@@ -9,8 +9,7 @@ from app.schemas import (
     InterviewCodeValidation, ResumeUploadResponse,
     InterviewStartRequest, InterviewSubmitRequest
 )
-from app.services.resume_parser import parse_resume
-from app.services.ats_scorer import calculate_ats_score
+from app.services.ai_service import get_ai_service
 
 router = APIRouter(prefix="/api/interview", tags=["interview"])
 
@@ -71,11 +70,20 @@ async def upload_resume(
         # Read file content
         content = await resume.read()
         
-        # Parse resume
-        parsed_data = parse_resume(content, resume.filename)
+        # Get AI service
+        ai_service = get_ai_service()
         
-        # Calculate ATS score
-        ats_score = calculate_ats_score(parsed_data, recruitment)
+        # Parse resume with AI
+        parsed_data, parsing_method = ai_service.parse_resume(content, resume.filename)
+        print(f"Resume parsed with: {parsing_method}")
+        
+        # Calculate ATS score with AI
+        job_requirements = f"""Position: {recruitment.title}
+Department: {recruitment.department}
+Location: {recruitment.location}
+Requirements: {recruitment.requirements or 'Not specified'}"""
+        
+        ats_evaluation = ai_service.calculate_ats_score(parsed_data, job_requirements)
         
         # Generate session token
         session_token = generate_session_token()
@@ -87,11 +95,13 @@ async def upload_resume(
             email=parsed_data.get("email", ""),
             phone=parsed_data.get("phone"),
             location=parsed_data.get("location"),
-            current_company=parsed_data.get("current_company"),
             experience=parsed_data.get("experience"),
             education=parsed_data.get("education"),
-            skills=parsed_data.get("skills", []),
-            ats_score=ats_score,
+            skills=parsed_data.get("skills"),
+            ats_score=ats_evaluation["ats_score"],
+            ats_strengths=ats_evaluation.get("strengths"),
+            ats_gaps=ats_evaluation.get("gaps"),
+            ats_reasoning=ats_evaluation.get("reasoning"),
             session_token=session_token,
             status="New",
             resume_url=f"uploads/{resume.filename}"  # TODO: Save to actual storage
@@ -104,10 +114,99 @@ async def upload_resume(
         return ResumeUploadResponse(
             candidate_id=candidate.id,
             session_token=session_token,
-            ats_score=ats_score,
-            message="Resume processed successfully"
+            ats_score=ats_evaluation["ats_score"],
+            message=f"Resume processed successfully with {parsing_method}"
         )
         
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error processing resume: {str(e)}"
+        )
+
+@router.post("/upload-resume-ai", response_model=ResumeUploadResponse)
+async def upload_resume_ai(
+    interview_code: str,
+    resume: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """Upload resume and create candidate profile using AI parsing"""
+    # Validate interview code
+    recruitment = db.query(Recruitment).filter(
+        Recruitment.interview_code == interview_code,
+        Recruitment.status == "Active"
+    ).first()
+    
+    if not recruitment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invalid or expired interview code"
+        )
+    
+    # Validate file type
+    if not resume.filename.lower().endswith(('.pdf', '.docx', '.doc')):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only PDF and DOCX files are supported"
+        )
+    
+    try:
+        # Read file content
+        content = await resume.read()
+        
+        # Get AI service
+        ai_service = get_ai_service()
+        
+        # Parse resume with AI
+        parsed_data, parsing_method = ai_service.parse_resume(content, resume.filename)
+        print(f"✓ Resume parsed with: {parsing_method}")
+        
+        # Calculate ATS score with AI
+        job_requirements = f"""Position: {recruitment.title}
+Department: {recruitment.department}
+Location: {recruitment.location}
+Requirements: {recruitment.requirements or 'Not specified'}"""
+        
+        ats_evaluation = ai_service.calculate_ats_score(parsed_data, job_requirements)
+        
+        # Generate session token
+        session_token = generate_session_token()
+        
+        # Create candidate record with AI evaluation
+        candidate = Candidate(
+            recruitment_id=recruitment.id,
+            name=parsed_data.get("name", "Unknown"),
+            email=parsed_data.get("email", "noemail@provided.com"),
+            phone=parsed_data.get("phone"),
+            location=parsed_data.get("location"),
+            experience=parsed_data.get("experience"),
+            education=parsed_data.get("education"),
+            skills=parsed_data.get("skills"),
+            ats_score=ats_evaluation["ats_score"],
+            ats_strengths=ats_evaluation.get("strengths"),
+            ats_gaps=ats_evaluation.get("gaps"),
+            ats_reasoning=ats_evaluation.get("reasoning"),
+            session_token=session_token,
+            status="New",
+            resume_url=f"uploads/{resume.filename}"  # TODO: Save to actual storage
+        )
+        
+        db.add(candidate)
+        db.commit()
+        db.refresh(candidate)
+        
+        return ResumeUploadResponse(
+            candidate_id=candidate.id,
+            session_token=session_token,
+            ats_score=ats_evaluation["ats_score"],
+            message=f"Resume processed successfully with {parsing_method}"
+        )
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -40,6 +40,9 @@ class CandidateResponse(CandidateBase):
     status: str
     ats_score: Optional[int] = None
     interview_score: Optional[int] = None
+    ats_strengths: Optional[List[str]] = None
+    ats_gaps: Optional[List[str]] = None
+    ats_reasoning: Optional[str] = None
     summary: Optional[str] = None
     flags: Optional[List[Dict]] = []
     transcript_url: Optional[str] = None

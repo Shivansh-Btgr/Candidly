@@ -25,6 +25,11 @@ class Candidate(Base):
     ats_score = Column(Integer)  # 0-100
     interview_score = Column(Integer, nullable=True)  # 0-100, null if not interviewed
     
+    # AI ATS Evaluation
+    ats_strengths = Column(JSON, nullable=True)  # List of strengths from AI evaluation
+    ats_gaps = Column(JSON, nullable=True)  # List of gaps from AI evaluation
+    ats_reasoning = Column(Text, nullable=True)  # AI explanation of ATS score
+    
     # Interview Data
     summary = Column(Text)  # AI-generated summary
     flags = Column(JSON, default=list)  # List of flag objects: [{"type": "sound", "severity": "high"}]

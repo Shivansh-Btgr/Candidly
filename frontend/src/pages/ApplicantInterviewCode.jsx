@@ -28,8 +28,8 @@ function ApplicantInterviewCode() {
       sessionStorage.setItem('recruitment_id', response.recruitment_id);
       sessionStorage.setItem('recruitment_title', response.recruitment_title);
       
-      // Navigate to candidate details form
-      navigate('/applicant/details');
+      // Navigate to resume upload page
+      navigate('/applicant/upload');
     } catch (err) {
       setError(err.message || 'Invalid interview code');
     } finally {

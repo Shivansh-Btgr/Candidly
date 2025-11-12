@@ -5,6 +5,7 @@ import CandidateDetail from './pages/CandidateDetail';
 import RecruitmentConfig from './pages/RecruitmentConfig';
 import ApplicantInterviewCode from './pages/ApplicantInterviewCode';
 import ApplicantDetailsForm from './pages/ApplicantDetailsForm';
+import ApplicantResumeUpload from './pages/ApplicantResumeUpload';
 import ApplicantProfile from './pages/ApplicantProfile';
 import ApplicantInterview from './pages/ApplicantInterview';
 
@@ -19,6 +20,7 @@ function App() {
         
         {/* Applicant Flow */}
         <Route path="/applicant/code" element={<ApplicantInterviewCode />} />
+        <Route path="/applicant/upload" element={<ApplicantResumeUpload />} />
         <Route path="/applicant/details" element={<ApplicantDetailsForm />} />
         <Route path="/applicant/profile" element={<ApplicantProfile />} />
         <Route path="/applicant/interview" element={<ApplicantInterview />} />

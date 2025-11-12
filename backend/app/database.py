@@ -3,11 +3,17 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Settings(BaseSettings):
     database_url: str = "sqlite:///./candidly.db"
     secret_key: str = "your-secret-key-change-in-production"
     openai_api_key: str = ""
+    gemini_api_key: str = ""
     cors_origins: str = "http://localhost:5173"
     
     class Config:

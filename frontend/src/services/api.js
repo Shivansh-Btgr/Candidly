@@ -107,6 +107,26 @@ export const interviewApi = {
     return response.json();
   },
   
+  uploadResumeAI: async (interviewCode, resumeFile) => {
+    const formData = new FormData();
+    formData.append('resume', resumeFile);
+    
+    const response = await fetch(
+      `${API_BASE_URL}/interview/upload-resume-ai?interview_code=${interviewCode}`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
+      throw new Error(error.detail || 'AI resume parsing failed');
+    }
+    
+    return response.json();
+  },
+  
   start: (sessionToken) => apiCall('/interview/start', {
     method: 'POST',
     body: JSON.stringify({ session_token: sessionToken }),
