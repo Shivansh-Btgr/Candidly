@@ -1,29 +1,99 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, ArrowLeft, Save, Copy, Check, Settings } from 'lucide-react';
-import { mockRecruitments } from '../data/mockData';
+import { recruitmentApi } from '../services/api';
 
 function RecruitmentConfig() {
   const navigate = useNavigate();
-  const recruitment = mockRecruitments.find(r => r.id === 1);
   
-  const [title, setTitle] = useState(recruitment.title);
+  const [recruitment, setRecruitment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState(null);
+  const [title, setTitle] = useState('');
+  const [requirements, setRequirements] = useState('');
   const [copied, setCopied] = useState(false);
-  
-  // Generate interview code based on recruitment ID
-  const interviewCode = `CNDLY-001-SEN4a2b`;
+
+  useEffect(() => {
+    const fetchRecruitment = async () => {
+      try {
+        setLoading(true);
+        const data = await recruitmentApi.getActive();
+        setRecruitment(data);
+        setTitle(data.title);
+        setRequirements(data.requirements || '');
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching recruitment:', err);
+        // If 404, redirect to dashboard to create recruitment
+        if (err.message.includes('404') || err.message.includes('not found')) {
+          navigate('/recruiter');
+        } else {
+          setError(err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchRecruitment();
+  }, [navigate]);
   
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(interviewCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (recruitment?.interview_code) {
+      navigator.clipboard.writeText(recruitment.interview_code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
-  const handleSave = () => {
-    // TODO: Save title to backend
-    alert('Configuration saved successfully!');
-    navigate('/recruiter');
+  const handleSave = async () => {
+    if (!recruitment) return;
+    
+    try {
+      setSaving(true);
+      await recruitmentApi.update(recruitment.id, { 
+        title,
+        requirements: requirements || null
+      });
+      
+      // Show success indicator
+      setSaved(true);
+      
+      // Navigate back after brief delay to show success state
+      setTimeout(() => {
+        navigate('/recruiter');
+      }, 800);
+    } catch (err) {
+      alert(`Error saving: ${err.message}`);
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error || !recruitment) {
+    return (
+      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 text-xl mb-4">{error || 'No recruitment found'}</p>
+          <button
+            onClick={() => navigate('/recruiter')}
+            className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-500"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-950">
@@ -65,7 +135,7 @@ function RecruitmentConfig() {
         <div className="space-y-6">
           {/* Title Configuration */}
           <div className="bg-dark-800 rounded-lg shadow-sm border border-dark-700 p-6">
-            <h3 className="text-xl font-bold text-white mb-4">Drive Title</h3>
+            <h3 className="text-xl font-bold text-white mb-4">Basic Information</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -82,6 +152,22 @@ function RecruitmentConfig() {
                   This title will be displayed to candidates during the interview
                 </p>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Requirements & AI Instructions
+                </label>
+                <textarea
+                  value={requirements}
+                  onChange={(e) => setRequirements(e.target.value)}
+                  rows="8"
+                  className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-gray-500 resize-none"
+                  placeholder="Describe role requirements, key skills, experience level, and evaluation criteria for AI..."
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  These instructions will guide the AI during resume screening (ATS) and interviews. Be specific about required skills, experience level, technical competencies, and evaluation criteria.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -96,7 +182,7 @@ function RecruitmentConfig() {
                 <div className="flex items-center space-x-3">
                   <div className="flex-1 bg-dark-900 rounded-lg px-4 py-4 border border-dark-700">
                     <code className="text-2xl font-mono font-bold text-white tracking-wider">
-                      {interviewCode}
+                      {recruitment.interview_code}
                     </code>
                   </div>
                   <button
@@ -152,14 +238,29 @@ function RecruitmentConfig() {
           <div className="flex items-center space-x-4">
             <button
               onClick={handleSave}
-              className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-primary-600 hover:bg-primary-500 text-white rounded-lg font-semibold transition-colors shadow-lg shadow-primary-900/50"
+              disabled={saving || saved}
+              className={`flex-1 flex items-center justify-center space-x-2 px-6 py-4 rounded-lg font-semibold transition-all shadow-lg disabled:cursor-not-allowed ${
+                saved 
+                  ? 'bg-green-600 text-white shadow-green-900/50' 
+                  : 'bg-primary-600 hover:bg-primary-500 text-white shadow-primary-900/50 disabled:opacity-50'
+              }`}
             >
-              <Save className="w-5 h-5" />
-              <span>Save Configuration</span>
+              {saved ? (
+                <>
+                  <Check className="w-5 h-5" />
+                  <span>Saved!</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5" />
+                  <span>{saving ? 'Saving...' : 'Save Configuration'}</span>
+                </>
+              )}
             </button>
             <button
               onClick={() => navigate('/recruiter')}
-              className="px-6 py-4 border border-dark-600 text-gray-300 rounded-lg font-semibold hover:bg-dark-700 transition-colors"
+              disabled={saving || saved}
+              className="px-6 py-4 border border-dark-600 text-gray-300 rounded-lg font-semibold hover:bg-dark-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>

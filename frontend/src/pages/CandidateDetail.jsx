@@ -1,22 +1,72 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Sparkles, ArrowLeft, Mail, Phone, MapPin, Briefcase, 
   GraduationCap, Calendar, Award, TrendingUp, FileText,
   CheckCircle, Clock, Target, AlertTriangle, Shield, Download
 } from 'lucide-react';
-import { mockRecruitments, mockCandidates } from '../data/mockData';
+import { candidatesApi } from '../services/api';
 
 function CandidateDetail() {
   const { recruitmentId, candidateId } = useParams();
   const navigate = useNavigate();
   
-  const recruitment = mockRecruitments.find(r => r.id === parseInt(recruitmentId));
-  const candidates = mockCandidates[parseInt(recruitmentId)] || [];
-  const candidate = candidates.find(c => c.id === parseInt(candidateId));
+  const [candidate, setCandidate] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!candidate || !recruitment) {
-    return <div className="min-h-screen flex items-center justify-center">Candidate not found</div>;
+  useEffect(() => {
+    const fetchCandidate = async () => {
+      try {
+        setLoading(true);
+        const data = await candidatesApi.getById(candidateId);
+        setCandidate(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching candidate:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCandidate();
+  }, [candidateId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
   }
+
+  if (error || !candidate) {
+    return (
+      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 text-xl mb-4">{error || 'Candidate not found'}</p>
+          <button
+            onClick={() => navigate('/recruiter')}
+            className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-500"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleDownloadTranscript = async () => {
+    try {
+      const data = await candidatesApi.getTranscript(candidateId);
+      // For now, show alert with transcript URL
+      alert(`Transcript URL: ${data.transcript_url}`);
+      // TODO: Implement actual file download
+    } catch (err) {
+      alert('Transcript not available');
+    }
+  };
 
   const getScoreColor = (score) => {
     if (score >= 90) return 'text-green-400';
@@ -330,7 +380,11 @@ function CandidateDetail() {
                 <button className="w-full px-4 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-500 transition-colors shadow-lg shadow-primary-900/50">
                   Schedule Interview
                 </button>
-                <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors flex items-center justify-center space-x-2">
+                <button 
+                  onClick={handleDownloadTranscript}
+                  className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-500 transition-colors flex items-center justify-center space-x-2"
+                  disabled={!candidate.transcript_url}
+                >
                   <Download className="w-4 h-4" />
                   <span>Download Interview Transcript</span>
                 </button>
