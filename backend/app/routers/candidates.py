@@ -67,7 +67,12 @@ def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
             detail="Candidate not found"
         )
     
-    return CandidateResponse.model_validate(candidate)
+    # Manually populate recruitment_title
+    response_data = CandidateResponse.model_validate(candidate)
+    if candidate.recruitment:
+        response_data.recruitment_title = candidate.recruitment.title
+    
+    return response_data
 
 @router.post("", response_model=CandidateResponse, status_code=status.HTTP_201_CREATED)
 def create_candidate(candidate: CandidateCreate, db: Session = Depends(get_db)):
@@ -89,7 +94,12 @@ def create_candidate(candidate: CandidateCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_candidate)
     
-    return CandidateResponse.model_validate(db_candidate)
+    # Manually populate recruitment_title
+    response_data = CandidateResponse.model_validate(db_candidate)
+    if db_candidate.recruitment:
+        response_data.recruitment_title = db_candidate.recruitment.title
+    
+    return response_data
 
 @router.put("/{candidate_id}", response_model=CandidateResponse)
 def update_candidate(

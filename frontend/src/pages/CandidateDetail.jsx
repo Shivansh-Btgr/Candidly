@@ -20,6 +20,7 @@ function CandidateDetail() {
       try {
         setLoading(true);
         const data = await candidatesApi.getById(candidateId);
+        console.log('Candidate data:', data); // Debug log
         setCandidate(data);
         setError(null);
       } catch (err) {
@@ -130,20 +131,26 @@ function CandidateDetail() {
               </div>
               <div>
                 <h2 className="text-3xl font-bold text-white mb-2">{candidate.name}</h2>
-                <p className="text-lg text-gray-300 mb-3">{candidate.currentCompany} • {candidate.experience}</p>
+                {candidate.experience && (
+                  <p className="text-lg text-gray-300 mb-3 line-clamp-1">{candidate.experience}</p>
+                )}
                 <div className="flex items-center space-x-4 text-sm text-gray-400">
                   <span className="flex items-center">
                     <Mail className="w-4 h-4 mr-1" />
                     {candidate.email}
                   </span>
-                  <span className="flex items-center">
-                    <Phone className="w-4 h-4 mr-1" />
-                    {candidate.phone}
-                  </span>
-                  <span className="flex items-center">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    {candidate.location}
-                  </span>
+                  {candidate.phone && (
+                    <span className="flex items-center">
+                      <Phone className="w-4 h-4 mr-1" />
+                      {candidate.phone}
+                    </span>
+                  )}
+                  {candidate.location && (
+                    <span className="flex items-center">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {candidate.location}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -153,21 +160,23 @@ function CandidateDetail() {
               </span>
               <p className="text-sm text-gray-500 mt-2">
                 <Calendar className="w-4 h-4 inline mr-1" />
-                Applied: {new Date(candidate.appliedDate).toLocaleDateString()}
+                Applied: {new Date(candidate.applied_date).toLocaleDateString()}
               </p>
             </div>
           </div>
 
-          <div className="border-t border-dark-700 pt-6">
-            <p className="text-sm text-gray-400 mb-2">Applying for:</p>
-            <p className="text-lg font-semibold text-white">{recruitment.title}</p>
-          </div>
+          {candidate.recruitment_title && (
+            <div className="border-t border-dark-700 pt-6">
+              <p className="text-sm text-gray-400 mb-2">Applying for:</p>
+              <p className="text-lg font-semibold text-white">{candidate.recruitment_title}</p>
+            </div>
+          )}
         </div>
 
         {/* Score Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           {/* ATS Score */}
-          <div className={`bg-dark-800 rounded-lg shadow-sm border-2 p-8 ${getScoreBackground(candidate.atsScore)}`}>
+          <div className={`bg-dark-800 rounded-lg shadow-sm border-2 p-8 ${getScoreBackground(candidate.ats_score)}`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-dark-900 rounded-full flex items-center justify-center border border-dark-700">
@@ -179,34 +188,50 @@ function CandidateDetail() {
                 </div>
               </div>
               <div className="text-right">
-                <p className={`text-5xl font-bold ${getScoreColor(candidate.atsScore)}`}>
-                  {candidate.atsScore}
-                </p>
-                <p className="text-sm text-gray-400">out of 100</p>
+                {candidate.ats_score !== null && candidate.ats_score !== undefined ? (
+                  <>
+                    <p className={`text-5xl font-bold ${getScoreColor(candidate.ats_score)}`}>
+                      {candidate.ats_score}
+                    </p>
+                    <p className="text-sm text-gray-400">out of 100</p>
+                  </>
+                ) : (
+                  <p className="text-3xl font-semibold text-gray-500">N/A</p>
+                )}
               </div>
             </div>
-            <div className="w-full bg-dark-700 rounded-full h-3 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${
-                  candidate.atsScore >= 90 ? 'bg-green-500' :
-                  candidate.atsScore >= 80 ? 'bg-blue-500' :
-                  candidate.atsScore >= 70 ? 'bg-yellow-500' : 'bg-orange-500'
-                }`}
-                style={{ width: `${candidate.atsScore}%` }}
-              />
-            </div>
-            <div className="mt-4 flex items-start space-x-2">
-              <CheckCircle className="w-5 h-5 text-green-400 mt-0.5" />
-              <p className="text-sm text-gray-300">
-                Strong match with job requirements. Skills and experience align well with the position.
-              </p>
-            </div>
+            {candidate.ats_score !== null && candidate.ats_score !== undefined ? (
+              <>
+                <div className="w-full bg-dark-700 rounded-full h-3 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      candidate.ats_score >= 90 ? 'bg-green-500' :
+                      candidate.ats_score >= 80 ? 'bg-blue-500' :
+                      candidate.ats_score >= 70 ? 'bg-yellow-500' : 'bg-orange-500'
+                    }`}
+                    style={{ width: `${candidate.ats_score}%` }}
+                  />
+                </div>
+                <div className="mt-4 flex items-start space-x-2">
+                  <CheckCircle className="w-5 h-5 text-green-400 mt-0.5" />
+                  <p className="text-sm text-gray-300">
+                    Strong match with job requirements. Skills and experience align well with the position.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="mt-4 p-4 bg-dark-900 rounded-lg border border-dark-700">
+                <p className="text-sm text-gray-400 text-center">
+                  Resume analysis pending
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Interview Score */}
           <div className={`bg-dark-800 rounded-lg shadow-sm border-2 p-8 ${
-            candidate.interviewScore 
-              ? getScoreBackground(candidate.interviewScore)
+            candidate.interview_score 
+              ? getScoreBackground(candidate.interview_score)
               : 'bg-dark-800 border-dark-700'
           }`}>
             <div className="flex items-center justify-between mb-4">
@@ -220,10 +245,10 @@ function CandidateDetail() {
                 </div>
               </div>
               <div className="text-right">
-                {candidate.interviewScore ? (
+                {candidate.interview_score ? (
                   <>
-                    <p className={`text-5xl font-bold ${getScoreColor(candidate.interviewScore)}`}>
-                      {candidate.interviewScore}
+                    <p className={`text-5xl font-bold ${getScoreColor(candidate.interview_score)}`}>
+                      {candidate.interview_score}
                     </p>
                     <p className="text-sm text-gray-400">out of 100</p>
                   </>
@@ -235,16 +260,16 @@ function CandidateDetail() {
                 )}
               </div>
             </div>
-            {candidate.interviewScore ? (
+            {candidate.interview_score ? (
               <>
                 <div className="w-full bg-dark-700 rounded-full h-3 overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
-                      candidate.interviewScore >= 90 ? 'bg-green-500' :
-                      candidate.interviewScore >= 80 ? 'bg-blue-500' :
-                      candidate.interviewScore >= 70 ? 'bg-yellow-500' : 'bg-orange-500'
+                      candidate.interview_score >= 90 ? 'bg-green-500' :
+                      candidate.interview_score >= 80 ? 'bg-blue-500' :
+                      candidate.interview_score >= 70 ? 'bg-yellow-500' : 'bg-orange-500'
                     }`}
-                    style={{ width: `${candidate.interviewScore}%` }}
+                    style={{ width: `${candidate.interview_score}%` }}
                   />
                 </div>
                 <div className="mt-4 flex items-start space-x-2">
@@ -273,7 +298,11 @@ function CandidateDetail() {
                 <FileText className="w-5 h-5 text-primary-400" />
                 <h3 className="text-xl font-bold text-white">Candidate Summary</h3>
               </div>
-              <p className="text-gray-300 leading-relaxed">{candidate.summary}</p>
+              {candidate.summary ? (
+                <p className="text-gray-300 leading-relaxed">{candidate.summary}</p>
+              ) : (
+                <p className="text-gray-500 italic">N/A - Interview pending</p>
+              )}
             </div>
 
             {/* Skills Card */}
@@ -282,26 +311,21 @@ function CandidateDetail() {
                 <TrendingUp className="w-5 h-5 text-primary-400" />
                 <h3 className="text-xl font-bold text-white">Skills & Expertise</h3>
               </div>
-              <div className="flex flex-wrap gap-3">
-                {candidate.skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="px-4 py-2 bg-primary-900/30 text-primary-300 rounded-lg text-sm font-medium border border-primary-800"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
+              {candidate.skills ? (
+                <p className="text-gray-300 whitespace-pre-line">{candidate.skills}</p>
+              ) : (
+                <p className="text-gray-500 italic">N/A</p>
+              )}
             </div>
 
             {/* Combined Score */}
-            {candidate.interviewScore && (
+            {candidate.interview_score && (
               <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg shadow-lg p-6 text-white border border-primary-700">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-primary-200 mb-1">Overall Score</p>
                     <h3 className="text-4xl font-bold">
-                      {Math.round((candidate.atsScore + candidate.interviewScore) / 2)}
+                      {Math.round((candidate.ats_score + candidate.interview_score) / 2)}
                     </h3>
                     <p className="text-sm text-primary-200 mt-1">
                       Combined ATS & Interview Assessment
@@ -321,7 +345,11 @@ function CandidateDetail() {
                 <GraduationCap className="w-5 h-5 text-primary-400" />
                 <h3 className="text-lg font-bold text-white">Education</h3>
               </div>
-              <p className="text-gray-300 text-sm leading-relaxed">{candidate.education}</p>
+              {candidate.education ? (
+                <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">{candidate.education}</p>
+              ) : (
+                <p className="text-gray-500 text-sm italic">N/A</p>
+              )}
             </div>
 
             {/* Flags Card */}
@@ -331,7 +359,9 @@ function CandidateDetail() {
                 <h3 className="text-lg font-bold text-white">Interview Flags</h3>
               </div>
               <div className="space-y-3">
-                {candidate.flags && candidate.flags.length === 0 ? (
+                {!candidate.flags ? (
+                  <p className="text-gray-500 text-sm italic">N/A - Interview pending</p>
+                ) : candidate.flags.length === 0 ? (
                   <div className="flex items-center space-x-2 p-3 bg-green-900/20 border border-green-800 rounded-lg">
                     <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
                     <div>
@@ -341,7 +371,7 @@ function CandidateDetail() {
                   </div>
                 ) : (
                   <>
-                    {candidate.flags?.includes('sound') && (
+                    {candidate.flags?.some(f => f.type === 'sound') && (
                       <div className="flex items-center space-x-2 p-3 bg-yellow-900/20 border border-yellow-800 rounded-lg">
                         <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
                         <div>
@@ -350,7 +380,7 @@ function CandidateDetail() {
                         </div>
                       </div>
                     )}
-                    {candidate.flags?.includes('face') && (
+                    {candidate.flags?.some(f => f.type === 'face') && (
                       <div className="flex items-center space-x-2 p-3 bg-orange-900/20 border border-orange-800 rounded-lg">
                         <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0" />
                         <div>
@@ -359,7 +389,7 @@ function CandidateDetail() {
                         </div>
                       </div>
                     )}
-                    {candidate.flags?.includes('ai') && (
+                    {candidate.flags?.some(f => f.type === 'ai') && (
                       <div className="flex items-center space-x-2 p-3 bg-red-900/20 border border-red-800 rounded-lg">
                         <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
                         <div>

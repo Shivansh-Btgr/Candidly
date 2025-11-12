@@ -404,7 +404,7 @@ function RecruiterDashboard() {
             filteredCandidates.map((candidate) => (
               <div
                 key={candidate.id}
-                onClick={() => navigate(`/candidate/1/${candidate.id}`)}
+                onClick={() => navigate(`/candidate/${recruitment.id}/${candidate.id}`)}
                 className="bg-dark-800 rounded-lg shadow-sm border border-dark-700 p-6 hover:shadow-lg transition-all cursor-pointer hover:border-primary-700"
               >
                 <div className="flex items-start justify-between">
@@ -415,7 +415,9 @@ function RecruiterDashboard() {
                       </div>
                       <div>
                         <h3 className="text-xl font-bold text-white">{candidate.name}</h3>
-                        <p className="text-sm text-gray-400">{candidate.currentCompany} • {candidate.experience}</p>
+                        {candidate.experience && (
+                          <p className="text-sm text-gray-400 line-clamp-1">{candidate.experience}</p>
+                        )}
                       </div>
                     </div>
 
@@ -424,26 +426,25 @@ function RecruiterDashboard() {
                         <Mail className="w-4 h-4 mr-2" />
                         {candidate.email}
                       </div>
-                      <div className="flex items-center text-sm text-gray-400">
-                        <Phone className="w-4 h-4 mr-2" />
-                        {candidate.phone}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-400">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {candidate.location}
-                      </div>
+                      {candidate.phone && (
+                        <div className="flex items-center text-sm text-gray-400">
+                          <Phone className="w-4 h-4 mr-2" />
+                          {candidate.phone}
+                        </div>
+                      )}
+                      {candidate.location && (
+                        <div className="flex items-center text-sm text-gray-400">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          {candidate.location}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {candidate.skills.slice(0, 5).map((skill, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-dark-700 text-gray-300 rounded-full text-xs font-medium border border-dark-600"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
+                    {candidate.skills && (
+                      <div className="mt-4">
+                        <p className="text-sm text-gray-400 line-clamp-2">{candidate.skills}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="ml-6 flex flex-col items-end space-y-3">

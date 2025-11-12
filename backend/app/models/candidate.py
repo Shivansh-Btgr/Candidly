@@ -15,11 +15,10 @@ class Candidate(Base):
     phone = Column(String)
     location = Column(String)
     
-    # Professional Information
-    current_company = Column(String)
-    experience = Column(Integer)  # Years of experience
-    education = Column(String)
-    skills = Column(JSON)  # List of skills as JSON array
+    # Professional Information (All Optional)
+    experience = Column(Text, nullable=True)  # Company + years as string, can include multiple experiences
+    skills = Column(Text, nullable=True)  # List of skills as string
+    education = Column(String, nullable=True)
     
     # Status and Scores
     status = Column(String, default="New")  # New, Shortlisted, Interviewed, Offered, Rejected

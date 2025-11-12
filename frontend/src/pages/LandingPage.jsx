@@ -55,11 +55,12 @@ function LandingPage() {
 
           {/* Applicant Card */}
           <div
-            className="group cursor-pointer bg-dark-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 p-8 border-2 border-dark-700 hover:border-dark-600 opacity-75"
+            onClick={() => navigate('/applicant/code')}
+            className="group cursor-pointer bg-dark-800 rounded-2xl shadow-lg hover:shadow-primary-500/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 p-8 border-2 border-dark-700 hover:border-primary-500"
           >
             <div className="flex flex-col items-center text-center space-y-6">
-              <div className="w-24 h-24 bg-dark-700 rounded-full flex items-center justify-center group-hover:bg-dark-600 transition-colors border border-dark-600">
-                <Users className="w-12 h-12 text-gray-500" />
+              <div className="w-24 h-24 bg-primary-900/30 rounded-full flex items-center justify-center group-hover:bg-primary-800/40 transition-colors border border-primary-700">
+                <Users className="w-12 h-12 text-primary-400" />
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-white mb-2">
@@ -69,11 +70,8 @@ function LandingPage() {
                   Take AI-powered interviews and showcase your skills to potential employers
                 </p>
               </div>
-              <button 
-                disabled
-                className="mt-4 px-8 py-3 bg-dark-700 text-gray-500 rounded-lg font-semibold cursor-not-allowed w-full"
-              >
-                Coming Soon
+              <button className="mt-4 px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-500 transition-colors w-full shadow-lg shadow-primary-900/50">
+                Start Application
               </button>
             </div>
           </div>

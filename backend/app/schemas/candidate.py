@@ -1,16 +1,15 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, computed_field
 from datetime import datetime
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 
 class CandidateBase(BaseModel):
     name: str
     email: EmailStr
     phone: Optional[str] = None
     location: Optional[str] = None
-    current_company: Optional[str] = None
-    experience: Optional[int] = None
+    experience: Optional[str] = None  # Company + years as string
+    skills: Optional[str] = None  # List of skills as string
     education: Optional[str] = None
-    skills: Optional[List[str]] = []
 
 class CandidateCreate(CandidateBase):
     recruitment_id: int
@@ -22,10 +21,9 @@ class CandidateUpdate(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     location: Optional[str] = None
-    current_company: Optional[str] = None
-    experience: Optional[int] = None
+    experience: Optional[str] = None
+    skills: Optional[str] = None
     education: Optional[str] = None
-    skills: Optional[List[str]] = None
     status: Optional[str] = None
     ats_score: Optional[int] = None
     interview_score: Optional[int] = None
@@ -48,6 +46,7 @@ class CandidateResponse(CandidateBase):
     resume_url: Optional[str] = None
     applied_date: datetime
     interview_date: Optional[datetime] = None
+    recruitment_title: Optional[str] = None
     
     class Config:
         from_attributes = True
