@@ -69,7 +69,8 @@ export const mockCandidates = {
       currentCompany: "Tech Corp",
       summary: "Highly skilled frontend developer with 7+ years of experience in React, TypeScript, and modern web technologies. Led multiple successful projects delivering exceptional user experiences. Strong problem-solving skills and excellent team collaboration.",
       skills: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Node.js"],
-      education: "BS Computer Science - Stanford University"
+      education: "BS Computer Science - Stanford University",
+      flags: []
     },
     {
       id: 102,
@@ -85,7 +86,8 @@ export const mockCandidates = {
       currentCompany: "StartupXYZ",
       summary: "Passionate frontend engineer with a strong focus on performance optimization and accessibility. Experience building scalable web applications with modern frameworks. Active open-source contributor.",
       skills: ["React", "Vue.js", "JavaScript", "CSS", "GraphQL"],
-      education: "BS Software Engineering - UT Austin"
+      education: "BS Software Engineering - UT Austin",
+      flags: []
     },
     {
       id: 103,
@@ -101,7 +103,8 @@ export const mockCandidates = {
       currentCompany: "MegaTech Inc",
       summary: "Senior frontend architect with extensive experience leading large-scale web applications. Expert in React ecosystem and modern frontend tooling. Proven track record of mentoring junior developers and establishing best practices.",
       skills: ["React", "TypeScript", "Redux", "Webpack", "Jest", "CSS-in-JS"],
-      education: "MS Computer Science - MIT"
+      education: "MS Computer Science - MIT",
+      flags: []
     },
     {
       id: 104,
@@ -117,7 +120,8 @@ export const mockCandidates = {
       currentCompany: "Digital Agency",
       summary: "Creative frontend developer with strong design sensibility. Experienced in building responsive and interactive web applications. Quick learner with a passion for new technologies.",
       skills: ["React", "JavaScript", "SASS", "Bootstrap", "jQuery"],
-      education: "BS Information Systems - UCLA"
+      education: "BS Information Systems - UCLA",
+      flags: ["sound"]
     },
     {
       id: 105,
@@ -133,7 +137,8 @@ export const mockCandidates = {
       currentCompany: "FinTech Solutions",
       summary: "Full-stack developer with frontend specialization. Strong experience in React and state management. Excellent communication skills and ability to work in agile environments. Focus on code quality and testing.",
       skills: ["React", "TypeScript", "Redux", "Node.js", "MongoDB"],
-      education: "BS Computer Engineering - Boston University"
+      education: "BS Computer Engineering - Boston University",
+      flags: ["face", "ai"]
     }
   ],
   2: [ // Product Manager
@@ -151,7 +156,8 @@ export const mockCandidates = {
       currentCompany: "Enterprise Software Co",
       summary: "Strategic product manager with 8+ years driving product vision and execution. Proven success launching products that achieved 10M+ users. Strong analytical skills with data-driven decision making approach.",
       skills: ["Product Strategy", "Agile", "Data Analysis", "User Research", "SQL"],
-      education: "MBA - Harvard Business School"
+      education: "MBA - Harvard Business School",
+      flags: []
     },
     {
       id: 202,
@@ -167,7 +173,8 @@ export const mockCandidates = {
       currentCompany: "Mobile Gaming Studio",
       summary: "Product manager specializing in mobile products. Experience managing full product lifecycle from ideation to launch. Strong collaboration with engineering and design teams.",
       skills: ["Product Roadmap", "A/B Testing", "Analytics", "Wireframing", "JIRA"],
-      education: "BA Economics - Columbia University"
+      education: "BA Economics - Columbia University",
+      flags: []
     }
   ],
   3: [ // Data Scientist
@@ -185,7 +192,8 @@ export const mockCandidates = {
       currentCompany: "AI Research Lab",
       summary: "Senior data scientist with PhD in Machine Learning. Extensive experience building and deploying ML models at scale. Published researcher with 15+ papers in top-tier conferences. Expert in deep learning and NLP.",
       skills: ["Python", "TensorFlow", "PyTorch", "SQL", "AWS", "NLP"],
-      education: "PhD Machine Learning - Stanford University"
+      education: "PhD Machine Learning - Stanford University",
+      flags: []
     },
     {
       id: 302,
@@ -201,7 +209,8 @@ export const mockCandidates = {
       currentCompany: "Cloud Analytics Corp",
       summary: "Data scientist with strong engineering background. Experience building end-to-end ML pipelines and deploying models to production. Skilled in both traditional ML and deep learning approaches.",
       skills: ["Python", "Scikit-learn", "Docker", "Kubernetes", "Spark", "BigQuery"],
-      education: "MS Data Science - UC Berkeley"
+      education: "MS Data Science - UC Berkeley",
+      flags: []
     }
   ]
 };
