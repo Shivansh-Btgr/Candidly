@@ -10,19 +10,19 @@ This project is packaged for local development and demonstration. The codebase i
 ## 📸 Screenshots
 
 ### System Architecture
-![System Design](./demo-images/SystemCandidly.png)
+<p align="center">
+  <a href="./demo-images/SystemCandidly.png"><img src="./demo-images/SystemCandidly.png" alt="System Design" width="720"/></a>
+</p>
 
-### Landing Page
-![Landing Page](./demo-images/Candidly%20Landing%20Page.png)
-
-### Recruiter Dashboard
-![Candidates Page](./demo-images/Candidly%20Candidates%20Page.png)
-
-### Candidate Profile - Clean Interview
-![Clean Candidate](./demo-images/Candidly%20Clean%20Candidate.png)
-
-### Candidate Profile - Flagged for Security Issues
-![Suspicious Candidate](./demo-images/Candidly%20Sus%20Candidate.png)
+### App Screenshots (click thumbnails for full-size)
+<p align="center">
+  <a href="./demo-images/Candidly%20Landing%20Page.png"><img src="./demo-images/Candidly%20Landing%20Page.png" alt="Landing Page" width="420" style="margin:8px"/></a>
+  <a href="./demo-images/Candidly%20Candidates%20Page.png"><img src="./demo-images/Candidly%20Candidates%20Page.png" alt="Candidates Page" width="420" style="margin:8px"/></a>
+</p>
+<p align="center">
+  <a href="./demo-images/Candidly%20Clean%20Candidate.png"><img src="./demo-images/Candidly%20Clean%20Candidate.png" alt="Clean Candidate" width="420" style="margin:8px"/></a>
+  <a href="./demo-images/Candidly%20Sus%20Candidate.png"><img src="./demo-images/Candidly%20Sus%20Candidate.png" alt="Suspicious Candidate" width="420" style="margin:8px"/></a>
+</p>
 
 ## Quickstart (development)
 
