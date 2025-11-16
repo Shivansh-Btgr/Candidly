@@ -1,83 +1,52 @@
-# Candidly Backend
+# Candidly — Backend (FastAPI)
 
-FastAPI backend for the Candidly AI interview platform.
+This folder contains the FastAPI backend for Candidly. It provides APIs for recruitment management, candidate lifecycle, and the AI interview flow.
 
-## Setup
+## Quick setup
 
-1. Create a virtual environment:
-```bash
-python -m venv venv
-venv\Scripts\activate  # Windows
+1. Create and activate a Python virtual environment (Windows):
+
+```cmd
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
-2. Install dependencies:
-```bash
+2. Install Python dependencies:
+
+```cmd
 pip install -r requirements.txt
 ```
 
-3. Create `.env` file:
-```bash
-cp .env.example .env
+3. Copy and edit environment variables:
+
+```cmd
+copy .env.example .env
+# Edit .env to configure DATABASE_URL, OPENAI_API_KEY (optional), SECRET_KEY, CORS_ORIGINS
 ```
 
-4. Update `.env` with your configuration:
-- `DATABASE_URL`: Your PostgreSQL connection string (or use SQLite for development)
-- `OPENAI_API_KEY`: Your OpenAI API key (for AI features)
-- `SECRET_KEY`: A secure random string
-- `CORS_ORIGINS`: Frontend URL (http://localhost:5173)
+4. Start the development server:
 
-## Run the Server
-
-```bash
+```cmd
 uvicorn app.main:app --reload
 ```
 
-The API will be available at `http://localhost:8000`
+API docs: `http://localhost:8000/docs`
 
-API Documentation: `http://localhost:8000/docs`
+## Notes
+- The project uses SQLite by default for development. For production, set `DATABASE_URL` to a PostgreSQL instance.
+- Do NOT commit `.env` or any secrets to source control.
 
-## Project Structure
+## Important endpoints
+- `POST /api/interview/start` — start interview (session_token)
+- `POST /api/interview/chat` — single-turn chat with AI (message + conversation_history)
+- `POST /api/interview/submit` — submit interview responses for scoring
+- `POST /api/interview/update-flags` — update monitoring flags (candidate_id or session_token)
+- `GET /api/candidates/{id}/transcript` — download transcript file
 
-```
-app/
-├── models/              # Database models
-│   ├── recruitment.py   # Recruitment model
-│   └── candidate.py     # Candidate model
-├── schemas/             # Pydantic schemas
-│   ├── recruitment.py   # Recruitment schemas
-│   ├── candidate.py     # Candidate schemas
-│   └── interview.py     # Interview schemas
-├── routers/             # API endpoints
-│   ├── recruitment.py   # Recruitment endpoints
-│   ├── candidates.py    # Candidate endpoints
-│   └── interview.py     # Interview endpoints
-├── services/            # Business logic
-│   ├── resume_parser.py    # Resume parsing
-│   ├── ats_scorer.py       # ATS scoring
-│   ├── ai_interviewer.py   # AI interview (TODO)
-│   └── interview_analyzer.py  # Interview analysis (TODO)
-├── database.py          # Database configuration
-└── main.py             # FastAPI app
-```
-
-## API Endpoints
-
-### Recruitment
-- `GET /api/recruitment` - Get active recruitment
-- `GET /api/recruitment/{id}` - Get recruitment by ID
-- `POST /api/recruitment` - Create new recruitment
-- `PUT /api/recruitment/{id}` - Update recruitment
-- `DELETE /api/recruitment/{id}` - Delete recruitment
-- `GET /api/recruitment/{id}/stats` - Get recruitment statistics
-- `POST /api/recruitment/regenerate-code/{id}` - Regenerate interview code
-
-### Candidates
-- `GET /api/candidates` - List candidates (with search, filter, sort)
-- `GET /api/candidates/{id}` - Get candidate details
-- `POST /api/candidates` - Create candidate
-- `PUT /api/candidates/{id}` - Update candidate
-- `PATCH /api/candidates/{id}/status` - Update candidate status
-- `DELETE /api/candidates/{id}` - Delete candidate
+## Preparing for Git
+- Ensure `.gitignore` includes `.venv/`, `__pycache__/`, and uploaded transcript files.
+- Remove local secrets from `.env` before pushing.
 - `GET /api/candidates/{id}/transcript` - Download transcript
 
 ### Interview

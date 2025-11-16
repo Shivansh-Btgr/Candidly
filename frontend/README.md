@@ -1,83 +1,36 @@
-# Candidly - AI Interview Platform
+# Frontend — Candidly (React + Vite)
 
-A beautiful and modern frontend for an AI-powered interview platform built with React, Vite, and Tailwind CSS.
+This folder contains the React frontend for Candidly. It is built with Vite and Tailwind CSS and connects to the FastAPI backend at `http://localhost:8000` by default.
 
-## Features
+## Quickstart
 
-### 🏠 Landing Page
-- Clean and modern design with role selection
-- Choose between Recruiter and Applicant dashboards
-- Attractive hero section with feature highlights
+Prerequisites: Node.js 16+ and npm
 
-### 👔 Recruiter Dashboard
-- View all active recruitment campaigns
-- Expandable cards showing recruitment details
-- Real-time statistics (Total Applicants, Shortlisted, Interviewed, Offers)
-- Progress tracking for each recruitment
-
-### 📋 Recruitment Detail Page
-- Comprehensive statistics overview
-- Advanced search functionality
-- Sort candidates by:
-  - ATS Score
-  - Interview Score
-  - Application Date
-  - Name
-- Beautiful candidate cards with key information
-- Quick access to candidate profiles
-
-### 👤 Candidate Detail Page
-- Detailed candidate dashboard
-- **ATS Score** - Resume match with job requirements
-- **Interview Score** - AI assessment results
-- Comprehensive candidate summary
-- Skills and expertise visualization
-- Education and experience details
-- Action buttons (Schedule Interview, Move to Shortlist, Download Resume)
-- Overall combined score calculation
-
-## Tech Stack
-
-- **React 18** - Modern UI library
-- **Vite** - Lightning-fast build tool
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **Lucide React** - Beautiful icon library
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 16+ installed on your machine
-- npm or yarn package manager
-
-### Installation
-
-1. Navigate to the frontend directory:
 ```bash
 cd frontend
-```
-
-2. Install dependencies:
-```bash
 npm install
-```
-
-3. Start the development server:
-```bash
 npm run dev
 ```
 
-4. Open your browser and visit:
-```
-http://localhost:5173
-```
+Open `http://localhost:5173` in your browser.
 
-## Project Structure
+## Configuration
+- The frontend expects the backend API to be available at `http://localhost:8000/api`.
+- If you host the backend elsewhere, update the base URL in `src/services/api.js`.
 
-```
-frontend/
-├── src/
+## Key Pages
+- Landing page (role selection)
+- Recruiter dashboard (list of recruitment drives)
+- Candidate detail page (scores, flags, transcripts)
+- Applicant interview page (video + speech-based interview)
+
+## Preparing for Git
+- Ensure `node_modules/` and local build artifacts are ignored in `.gitignore`.
+- Remove any temporary debug helpers before committing.
+
+## Troubleshooting
+- If microphone or camera access fails, ensure your browser has permissions and no other app is locking the device.
+- The speech-based interview uses the Web Speech API (Chrome/Edge recommended).
 │   ├── data/
 │   │   └── mockData.js          # Mock data for recruitments and candidates
 │   ├── pages/

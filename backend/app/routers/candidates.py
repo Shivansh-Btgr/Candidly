@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import Optional
+import re
 
 from app.database import get_db
 from app.models import Candidate, Recruitment
@@ -10,6 +11,48 @@ from app.schemas import (
 )
 
 router = APIRouter(prefix="/api/candidates", tags=["candidates"])
+
+
+def _extract_email(raw: Optional[str]) -> Optional[str]:
+    if not raw:
+        return None
+    if isinstance(raw, str) and '@' in raw and ' ' not in raw and '|' not in raw and '/' not in raw:
+        return raw
+    m = re.search(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", str(raw))
+    if m:
+        return m.group(0)
+    return None
+
+
+def _to_candidate_response(obj):
+    """Convert a Candidate ORM object or dict to CandidateResponse safely.
+    Attempts Pydantic validation and falls back to sanitizing the email field.
+    """
+    try:
+        return CandidateResponse.model_validate(obj)
+    except Exception:
+        # Build a dict of attributes if it's an ORM object
+        if not isinstance(obj, dict):
+            data = {k: getattr(obj, k) for k in obj.__dict__ if not k.startswith('_')}
+        else:
+            data = dict(obj)
+
+        cleaned = _extract_email(data.get('email'))
+        # Use a valid placeholder to satisfy EmailStr when no valid email is extractable
+        data['email'] = cleaned or 'unknown@example.com'
+        try:
+            return CandidateResponse.model_validate(data)
+        except Exception:
+            # Last-resort minimal response
+            fallback = {
+                'id': data.get('id') or 0,
+                'recruitment_id': data.get('recruitment_id') or 0,
+                'name': data.get('name') or '',
+                'email': data.get('email') or 'unknown@example.com',
+                'status': data.get('status') or 'New',
+                'applied_date': data.get('applied_date')
+            }
+            return CandidateResponse.model_validate(fallback)
 
 @router.get("", response_model=CandidateList)
 def get_candidates(
@@ -50,9 +93,25 @@ def get_candidates(
     
     candidates = query.all()
     total = len(candidates)
-    
+
+    def _extract_email(raw: Optional[str]) -> Optional[str]:
+        if not raw:
+            return None
+        # If it's already a clean email, return it
+        if '@' in raw and ' ' not in raw and '|' not in raw and '/' not in raw:
+            return raw
+        # Try to extract an email using regex
+        m = re.search(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", raw)
+        if m:
+            return m.group(0)
+        return None
+
+    candidate_responses = []
+    for c in candidates:
+        candidate_responses.append(_to_candidate_response(c))
+
     return CandidateList(
-        candidates=[CandidateResponse.model_validate(c) for c in candidates],
+        candidates=candidate_responses,
         total=total
     )
 
@@ -68,10 +127,10 @@ def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
         )
     
     # Manually populate recruitment_title
-    response_data = CandidateResponse.model_validate(candidate)
+    response_data = _to_candidate_response(candidate)
     if candidate.recruitment:
         response_data.recruitment_title = candidate.recruitment.title
-    
+
     return response_data
 
 @router.post("", response_model=CandidateResponse, status_code=status.HTTP_201_CREATED)
@@ -95,10 +154,10 @@ def create_candidate(candidate: CandidateCreate, db: Session = Depends(get_db)):
     db.refresh(db_candidate)
     
     # Manually populate recruitment_title
-    response_data = CandidateResponse.model_validate(db_candidate)
+    response_data = _to_candidate_response(db_candidate)
     if db_candidate.recruitment:
         response_data.recruitment_title = db_candidate.recruitment.title
-    
+
     return response_data
 
 @router.put("/{candidate_id}", response_model=CandidateResponse)
@@ -124,7 +183,7 @@ def update_candidate(
     db.commit()
     db.refresh(db_candidate)
     
-    return CandidateResponse.model_validate(db_candidate)
+    return _to_candidate_response(db_candidate)
 
 @router.patch("/{candidate_id}/status", response_model=CandidateResponse)
 def update_candidate_status(
@@ -145,7 +204,7 @@ def update_candidate_status(
     db.commit()
     db.refresh(db_candidate)
     
-    return CandidateResponse.model_validate(db_candidate)
+    return _to_candidate_response(db_candidate)
 
 @router.delete("/{candidate_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_candidate(candidate_id: int, db: Session = Depends(get_db)):
@@ -166,6 +225,9 @@ def delete_candidate(candidate_id: int, db: Session = Depends(get_db)):
 @router.get("/{candidate_id}/transcript")
 def get_candidate_transcript(candidate_id: int, db: Session = Depends(get_db)):
     """Download candidate interview transcript"""
+    from fastapi.responses import FileResponse
+    import os
+    
     candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
     
     if not candidate:
@@ -180,6 +242,21 @@ def get_candidate_transcript(candidate_id: int, db: Session = Depends(get_db)):
             detail="Transcript not available"
         )
     
-    # TODO: Return actual file download
-    # For now, return the URL
-    return {"transcript_url": candidate.transcript_url, "candidate_name": candidate.name}
+    # Check if transcript file exists
+    transcript_path = candidate.transcript_url
+    if not os.path.exists(transcript_path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Transcript file not found on server"
+        )
+    
+    # Generate a clean filename for download
+    safe_name = candidate.name.replace(' ', '_').replace('/', '_')
+    download_filename = f"{safe_name}_interview_transcript.txt"
+    
+    # Return file as download
+    return FileResponse(
+        path=transcript_path,
+        filename=download_filename,
+        media_type='text/plain'
+    )

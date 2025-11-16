@@ -36,6 +36,15 @@ class Candidate(Base):
     transcript_url = Column(String, nullable=True)
     resume_url = Column(String, nullable=True)
     
+    # Interview Security Flags
+    interview_transcript = Column(Text, nullable=True)
+    multiple_faces_flag = Column(Integer, default=0)  # 0 or 1
+    noise_flag = Column(Integer, default=0)  # 0 or 1
+    ai_flag = Column(Integer, default=0)  # 0 or 1
+    interview_started_at = Column(DateTime, nullable=True)
+    interview_ended_at = Column(DateTime, nullable=True)
+    interview_question_index = Column(Integer, default=0)
+    
     # Session Management
     session_token = Column(String, nullable=True, index=True)
     

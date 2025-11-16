@@ -30,10 +30,9 @@ class AIService:
     def parse_resume(self, file_content: bytes, filename: str) -> Dict[str, Any]:
         """
         Parse resume using available AI providers in priority order:
-        1. Gemini (fast, free, cloud)
-        2. Ollama (free, local, no limits)
-        3. OpenAI (paid, cloud)
-        4. Regex (basic fallback)
+        1. Ollama (free, local, no limits)
+        2. OpenAI (paid, cloud)
+        3. Regex (basic fallback)
         """
         from app.services.resume_parser import extract_text_from_pdf, extract_text_from_docx
         
@@ -51,7 +50,6 @@ class AIService:
         
         # Try providers in order
         providers = [
-            (AIProvider.GEMINI, self._parse_with_gemini),
             (AIProvider.OLLAMA, self._parse_with_ollama),
             (AIProvider.OPENAI, self._parse_with_openai),
         ]
@@ -59,14 +57,14 @@ class AIService:
         for provider, parse_func in providers:
             try:
                 result = parse_func(text)
-                print(f"✓ Resume parsed with {provider.value}")
+                # Resume parsed with provider
                 return result, provider.value
             except Exception as e:
-                print(f"✗ {provider.value} parsing failed: {e}")
+                # Parsing failed for provider
                 continue
         
         # Final fallback: regex
-        print("✓ Using regex fallback for parsing")
+        # Using regex fallback for parsing
         return self._parse_with_regex(file_content, filename), AIProvider.REGEX.value
     
     def _parse_with_gemini(self, resume_text: str) -> Dict[str, Any]:
@@ -135,11 +133,22 @@ Return ONLY the JSON object."""
 Resume:
 {resume_text}
 
-Return JSON: {{"name": "...", "email": "...", "phone": "...", "location": "...", "experience": "...", "skills": "...", "education": "..."}}"""
+Return JSON with these exact fields:
+- name: full name as string
+- email: email address as string
+- phone: phone number as string or null
+- location: city/country as string or null
+- experience: work experience as a single string (not array)
+- skills: skills as comma-separated string (not array)
+- education: education details as a single string (not array)
+
+Example: {{"name": "John Doe", "email": "john@email.com", "phone": "+1234567890", "location": "New York", "experience": "Software Engineer at Google (2020-2023); Developer at Apple (2018-2020)", "skills": "Python, JavaScript, React, SQL", "education": "B.Tech in Computer Science from MIT (2014-2018)"}}
+
+Return ONLY the JSON object, no other text."""
 
         response = requests.post(
             "http://localhost:11434/api/generate",
-            json={"model": "mistral", "prompt": prompt, "stream": False, "format": "json"},
+            json={"model": "phi3", "prompt": prompt, "stream": False, "format": "json"},
             timeout=60
         )
         
@@ -211,6 +220,39 @@ Return: {{"name": "...", "email": "...", "phone": "...", "location": "...", "exp
             matches = re.findall(email_pattern, resume_text)
             parsed["email"] = matches[0] if matches else "noemail@provided.com"
         
+        # Convert lists to strings for database compatibility
+        if isinstance(parsed.get("experience"), list):
+            # Convert experience list to readable string
+            exp_items = []
+            for exp in parsed["experience"]:
+                if isinstance(exp, dict):
+                    exp_str = f"{exp.get('role', 'Role')} at {exp.get('company_name', 'Company')}"
+                    if exp.get('duration'):
+                        exp_str += f" ({exp.get('duration')})"
+                    exp_items.append(exp_str)
+                else:
+                    exp_items.append(str(exp))
+            parsed["experience"] = "; ".join(exp_items) if exp_items else None
+        
+        if isinstance(parsed.get("skills"), list):
+            # Convert skills list to comma-separated string
+            parsed["skills"] = ", ".join(str(s) for s in parsed["skills"])
+        
+        if isinstance(parsed.get("education"), list):
+            # Convert education list to readable string
+            edu_items = []
+            for edu in parsed["education"]:
+                if isinstance(edu, dict):
+                    edu_str = f"{edu.get('degree', 'Degree')} from {edu.get('institution_name', 'Institution')}"
+                    if edu.get('duration'):
+                        edu_str += f" ({edu.get('duration')})"
+                    if edu.get('CGPA'):
+                        edu_str += f" - CGPA: {edu.get('CGPA')}"
+                    edu_items.append(edu_str)
+                else:
+                    edu_items.append(str(edu))
+            parsed["education"] = "; ".join(edu_items) if edu_items else None
+        
         # Ensure optional fields exist
         for field in ["phone", "location", "experience", "skills", "education"]:
             if field not in parsed:
@@ -224,25 +266,23 @@ Return: {{"name": "...", "email": "...", "phone": "...", "location": "...", "exp
         """
         Calculate ATS score using available AI providers:
         1. Ollama (best for scoring, no safety filters)
-        2. Gemini (if Ollama not available)
-        3. Simple algorithm (fallback)
+        2. Simple algorithm (fallback)
         """
         providers = [
             (AIProvider.OLLAMA, self._score_with_ollama),
-            (AIProvider.GEMINI, self._score_with_gemini),
         ]
         
         for provider, score_func in providers:
             try:
                 result = score_func(candidate_data, job_requirements)
-                print(f"✓ ATS scored with {provider.value}: {result['ats_score']}")
+                # ATS scored with provider
                 return result
             except Exception as e:
-                print(f"✗ {provider.value} scoring failed: {e}")
+                # ATS scoring failed for provider
                 continue
         
         # Fallback to simple scoring
-        print("✓ Using simple scoring algorithm")
+        # Using simple scoring algorithm fallback
         return self._score_simple(candidate_data)
     
     def _score_with_ollama(self, candidate_data: Dict[str, Any], job_requirements: str) -> Dict[str, Any]:
@@ -265,7 +305,7 @@ Return JSON: {{"score": 0-100, "strengths": ["item1", "item2"], "gaps": ["item1"
 
         response = requests.post(
             "http://localhost:11434/api/generate",
-            json={"model": "mistral", "prompt": prompt, "stream": False, "format": "json", "options": {"temperature": 0.3}},
+            json={"model": "phi3", "prompt": prompt, "stream": False, "format": "json", "options": {"temperature": 0.3}},
             timeout=60
         )
         
@@ -377,6 +417,142 @@ JSON: {{"score": 85, "strengths": [], "gaps": [], "reasoning": ""}}"""
             return response.status_code == 200
         except:
             return False
+    
+    # ==================== CHAT / INTERVIEW ====================
+    
+    def chat(
+        self, 
+        message: str, 
+        system_prompt: str = "", 
+        conversation_history: list = None
+    ) -> str:
+        """
+        Chat with AI for interview conversations
+        Tries Gemini first, then Ollama, then OpenAI
+        
+        Args:
+            message: User's message
+            system_prompt: System instructions for AI behavior
+            conversation_history: List of previous messages (for context)
+        
+        Returns:
+            AI's response text
+        """
+        if conversation_history is None:
+            conversation_history = []
+        
+        # Try providers in order
+        providers = [
+            ("Ollama", self._chat_with_ollama),
+            ("OpenAI", self._chat_with_openai),
+        ]
+        
+        for provider_name, chat_func in providers:
+            try:
+                reply = chat_func(message, system_prompt, conversation_history)
+                # Chat response received from provider
+                return reply
+            except Exception as e:
+                # Chat failed for provider
+                continue
+        
+        # Fallback response
+        return "I apologize, but I'm having technical difficulties. Please try again in a moment."
+    
+    def _chat_with_gemini(self, message: str, system_prompt: str, history: list) -> str:
+        """Chat using Gemini"""
+        from app.database import get_settings
+        import google.generativeai as genai
+        from google.generativeai.types import HarmCategory, HarmBlockThreshold
+        
+        if self._gemini_model is None:
+            settings = get_settings()
+            if not settings.gemini_api_key:
+                raise ValueError("Gemini API key not configured")
+            genai.configure(api_key=settings.gemini_api_key)
+            self._gemini_model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        
+        # Build full prompt with system instructions
+        full_prompt = f"{system_prompt}\n\nCandidate: {message}\n\nInterviewer:"
+        
+        safety_settings = {
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+        }
+        
+        response = self._gemini_model.generate_content(
+            full_prompt,
+            safety_settings=safety_settings,
+            generation_config={"temperature": 0.7, "max_output_tokens": 300}
+        )
+        
+        return response.text.strip()
+    
+    def _chat_with_ollama(self, message: str, system_prompt: str, history: list) -> str:
+        """Chat using Ollama"""
+        import requests
+        
+        if not self._check_ollama():
+            raise ConnectionError("Ollama is not running")
+        
+        # Build messages with system prompt
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Add conversation history
+        for h in history:
+            messages.append(h)
+        
+        # Add current message
+        messages.append({"role": "user", "content": message})
+        
+        response = requests.post(
+            "http://localhost:11434/api/chat",
+            json={
+                "model": "phi3",
+                "messages": messages,
+                "stream": False,
+                "options": {"temperature": 0.7}
+            },
+            timeout=30
+        )
+        
+        if response.status_code != 200:
+            raise Exception(f"Ollama returned status {response.status_code}")
+        
+        result = response.json()
+        return result.get("message", {}).get("content", "").strip()
+    
+    def _chat_with_openai(self, message: str, system_prompt: str, history: list) -> str:
+        """Chat using OpenAI"""
+        from app.database import get_settings
+        from openai import OpenAI
+        
+        if self._openai_client is None:
+            settings = get_settings()
+            if not settings.openai_api_key:
+                raise ValueError("OpenAI API key not configured")
+            self._openai_client = OpenAI(api_key=settings.openai_api_key)
+        
+        # Build messages
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Add conversation history
+        for h in history:
+            messages.append(h)
+        
+        # Add current message
+        messages.append({"role": "user", "content": message})
+        
+        response = self._openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            temperature=0.7,
+            max_tokens=300
+        )
+        
+        return response.choices[0].message.content.strip()
 
 
 # Singleton instance

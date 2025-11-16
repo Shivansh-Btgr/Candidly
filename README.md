@@ -1,150 +1,167 @@
-# Candidly - AI Interview Platform
+# Candidly — AI Interview Platform
 
-An intelligent interview platform that uses AI to conduct interviews, analyze resumes, and provide comprehensive candidate assessments for recruiters.
+This repository contains the full-stack Candidly application: a React + Vite frontend and a FastAPI backend that together provide automated resume parsing, AI-driven interviews, transcript generation, and recruiter tools.
 
-## 🎯 Project Overview
+This project is packaged for local development and demonstration. The codebase includes:
+- Frontend: `frontend/` (React + Vite)
+- Backend: `backend/` (FastAPI)
+- Documentation and scripts to run the system locally
 
-Candidly streamlines the recruitment process by automating candidate screening and interviews using AI technology. The platform supports both recruiters managing hiring drives and candidates taking AI-powered interviews.
+## 📸 Screenshots
 
-## ✨ Current Features
+### System Architecture
+![System Design](./demo-images/SystemCandidly.png)
 
-### Recruiter Dashboard (Completed)
-- **Landing Page**: Role selection between Recruiter and Applicant
-- **Recruiter Dashboard**: 
-  - View all candidates for the active recruitment drive
-  - Search candidates by name, email, or status
-  - Sort by ATS Score, Interview Score, Date, or Name
-  - Real-time statistics (Total Applicants, Shortlisted, Interviewed, Offers Made)
-  - Status badges (New, Shortlisted, Interviewed, Offered)
-- **Candidate Detail Page**:
-  - Comprehensive candidate profile with scores and summary
-  - ATS Score and Interview Score with visual indicators
-  - Skills, Education, and Contact information
-  - Interview integrity flags (Sound, Face, AI detection)
-  - Download interview transcript functionality
-- **Configuration Page**:
-  - Edit recruitment drive title
-  - View and copy interview access code
-  - Manage recruitment settings (department, location, status)
+### Landing Page
+![Landing Page](./demo-images/Candidly%20Landing%20Page.png)
 
-### Design & UI
-- Dark purple theme with modern, professional aesthetics
-- Fully responsive layout
-- Smooth transitions and interactions
-- Icon-based navigation using Lucide React
+### Recruiter Dashboard
+![Candidates Page](./demo-images/Candidly%20Candidates%20Page.png)
 
-## 🚀 Tech Stack
+### Candidate Profile - Clean Interview
+![Clean Candidate](./demo-images/Candidly%20Clean%20Candidate.png)
 
-### Frontend
-- **React 18.2.0** - Component-based UI
-- **Vite 4.4.0** - Fast development build tool
-- **Tailwind CSS 3.3.6** - Utility-first styling with custom dark theme
-- **React Router 6.20.0** - Client-side routing
-- **Lucide React 0.292.0** - Beautiful icon library
+### Candidate Profile - Flagged for Security Issues
+![Suspicious Candidate](./demo-images/Candidly%20Sus%20Candidate.png)
 
-### Backend (To Be Implemented)
-- **FastAPI** - High-performance Python web framework
-- **PostgreSQL** - Relational database
-- **SQLAlchemy** - ORM for database operations
-- **Pydantic** - Data validation and settings management
+## Quickstart (development)
 
-## 📋 Workflow
+Prerequisites:
+- Node.js 16+ and npm
+- Python 3.10+ and pip
 
-### Candidate Journey
-1. **Landing**: Candidate selects "Applicant" role
-2. **Interview Code Entry**: Enter code provided by recruiter
-3. **Resume Upload**: Upload resume (PDF/DOCX)
-4. **Automatic Processing**:
-   - Resume parsed and candidate details extracted
-   - Candidate entry created in database
-   - ATS score calculated using AI
-5. **AI Interview**: Conduct interview with AI interviewer
-6. **Post-Interview**: System generates transcript, flags, and summary
+1) Backend setup
 
-### Recruiter Journey
-1. **Dashboard**: View all candidates with search/filter/sort
-2. **Candidate Review**: Click candidate to see detailed profile
-3. **Configuration**: Access settings to manage recruitment drive and interview code
-4. **Actions**: Download transcripts, update candidate status
+```cmd
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-## 🔧 Features To Do
+Create environment file from the example and update as needed:
 
-### High Priority - Candidate Frontend
-- [ ] Build Applicant landing page (interview code entry)
-- [ ] Create resume upload interface
-- [ ] Design AI interview interface (video/audio capture)
-- [ ] Build interview progress tracking UI
-- [ ] Add interview completion confirmation page
+```cmd
+copy .env.example .env
+# Edit .env to set DATABASE_URL, OPENAI_API_KEY (optional), and other settings
+```
 
-### High Priority - Backend API
-- [ ] **Database Models**:
-  - Recruitment model (id, title, department, location, status, interview_code)
-  - Candidate model (personal info, scores, status, flags, timestamps)
-  - Interview model (transcript, recording metadata)
-  
-- [ ] **Recruitment Endpoints**:
-  - `GET /api/recruitment` - Get active recruitment
-  - `POST /api/recruitment` - Create new recruitment
-  - `PUT /api/recruitment/{id}` - Update recruitment details
-  - `GET /api/recruitment/{id}/stats` - Get statistics
+Run the backend:
 
-- [ ] **Candidate Endpoints**:
-  - `GET /api/candidates` - List with search/filter/sort
-  - `GET /api/candidates/{id}` - Get candidate details
-  - `POST /api/candidates` - Create candidate from resume
-  - `PUT /api/candidates/{id}` - Update candidate
-  - `PATCH /api/candidates/{id}/status` - Update status
-  - `GET /api/candidates/{id}/transcript` - Download transcript
+```cmd
+uvicorn app.main:app --reload
+```
 
-- [ ] **Interview Endpoints**:
-  - `POST /api/interview/validate-code` - Verify interview code
-  - `POST /api/interview/upload-resume` - Upload and process resume
-  - `POST /api/interview/start` - Start interview session
-  - `POST /api/interview/submit` - Submit interview responses
-  - `GET /api/interview/{id}/status` - Get interview status
+API docs will be available at `http://localhost:8000/docs`.
 
-### High Priority - AI Integration
-- [ ] **Resume Parser**:
-  - Extract name, email, phone, location, experience
-  - Parse education, skills, work history
-  - Handle PDF and DOCX formats
-  
-- [ ] **ATS Scoring Service**:
-  - Analyze resume against job requirements
-  - Generate 0-100 score
-  - Provide scoring breakdown
+2) Frontend setup
 
-- [ ] **AI Interviewer**:
-  - Generate contextual interview questions
-  - Process candidate responses (speech-to-text)
-  - Conduct natural conversation flow
-  - Generate interview score (0-100)
-  
-- [ ] **Interview Analysis**:
-  - Detect sound anomalies (flag: "sound")
-  - Detect face/identity issues (flag: "face")
-  - Detect AI-generated responses (flag: "ai")
-  - Generate candidate summary
-  - Create detailed transcript
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-### Medium Priority
-- [ ] Session management for candidates (cookie/token-based, no login)
-- [ ] File storage system (S3/local) for resumes and transcripts
-- [ ] Email notifications (interview code delivery, status updates)
-- [ ] Bulk candidate operations (export CSV, bulk status update)
-- [ ] Interview recording storage and playback
-- [ ] Candidate self-service portal (check status with code)
+Open the frontend at `http://localhost:5173` (or the port Vite reports).
 
-### Low Priority / Future Enhancements
-- [ ] Multi-recruiter support with authentication
-- [ ] Advanced analytics dashboard
-- [ ] Custom interview question templates
-- [ ] Video interview recording review
-- [ ] Automated shortlisting based on thresholds
-- [ ] Integration with external ATS systems
-- [ ] Mobile responsive candidate interview interface
-- [ ] Real-time interview monitoring for recruiters
-- [ ] Customizable scoring weights
+3) Run an interview flow
+
+- Create or open a recruitment in the recruiter UI
+- Generate or copy the interview code and use it on the applicant flow
+- Upload a resume and proceed with the interview
+
+## Preparing for GitHub
+
+- Remove local secrets from `.env` before pushing. Do NOT commit `.env`.
+- Add a clear `LICENSE` file if you intend to publish the project.
+- Verify `.gitignore` contains `node_modules/`, `.venv/`, and other local artifacts.
+
+## Project structure
+
+```
+frontend/    # React + Vite app
+backend/     # FastAPI backend
+README.md    # This file
+```
+
+## Features
+
+### Database Models
+- ✅ Recruitment model (id, title, department, location, status, interview_code)
+- ✅ Candidate model (personal info, scores, status, flags, timestamps, session management)
+- ✅ Interview data (transcript, scores, security flags, question tracking)
+
+### Recruitment API
+- ✅ `GET /api/recruitment` - Get active recruitment
+- ✅ `POST /api/recruitment` - Create new recruitment
+- ✅ `PUT /api/recruitment/{id}` - Update recruitment details
+- ✅ `GET /api/recruitment/{id}` - Get specific recruitment
+- ✅ `GET /api/recruitment/{id}/stats` - Get recruitment statistics
+- ✅ `POST /api/recruitment/regenerate-code/{id}` - Regenerate interview code
+- ✅ `DELETE /api/recruitment/{id}` - Delete recruitment
+
+### Candidate API
+- ✅ `GET /api/candidates` - List with search/filter/sort
+- ✅ `GET /api/candidates/{id}` - Get candidate details
+- ✅ `POST /api/candidates` - Create candidate manually
+- ✅ `PUT /api/candidates/{id}` - Update candidate
+- ✅ `PATCH /api/candidates/{id}/status` - Update status
+- ✅ `DELETE /api/candidates/{id}` - Delete candidate
+- ✅ `GET /api/candidates/{id}/transcript` - Download interview transcript
+
+### Interview API
+- ✅ `POST /api/interview/validate-code` - Verify interview code
+- ✅ `POST /api/interview/upload-resume` - Upload and AI-parse resume (Ollama/OpenAI/Regex fallback)
+- ✅ `POST /api/interview/start` - Start interview session
+- ✅ `POST /api/interview/chat` - Chat with AI interviewer (conversational flow)
+- ✅ `POST /api/interview/submit` - Submit interview and get AI evaluation
+- ✅ `GET /api/interview/status/{session_token}` - Get interview status
+- ✅ `POST /api/interview/update-flags` - Update security flags during interview
+
+### AI Services
+- ✅ **Resume Parser**: Extract name, email, phone, location, experience, education, skills from PDF/DOCX
+- ✅ **ATS Scoring**: AI-powered resume evaluation against job requirements (0-100 score with strengths/gaps/reasoning)
+- ✅ **AI Interviewer**: 
+  - Server-managed question progression (opening → technical → coding challenge)
+  - Conversational AI with context awareness
+  - Speech-to-text input (Web Speech API)
+  - Text-to-speech responses (Web Speech Synthesis)
+  - Natural dialogue flow with conversation history
+- ✅ **Interview Analysis**:
+  - Ultra-strict scoring rubric (0-100) with detailed evaluation
+  - Sound anomaly detection (background noise/voices)
+  - Face detection monitoring (multiple faces)
+  - AI-generated response detection
+  - Automated candidate summary generation
+  - Detailed transcript creation and file export
+
+### Frontend Features
+- ✅ Landing page with role selection (Recruiter/Applicant)
+- ✅ Recruiter dashboard with candidate listing, search, filter, and sort
+- ✅ Candidate detail view with scores, flags, summary, and transcript download
+- ✅ Recruitment configuration page
+- ✅ Applicant flow: code entry → resume upload → speech-based AI interview
+- ✅ Real-time monitoring: camera feed, face detection, audio monitoring
+- ✅ Visual indicators for AI speaking and user listening states
+- ✅ Session management with secure tokens (no login required)
+
+### Security & Monitoring
+- ✅ Client-side face detection (face-api.js)
+- ✅ Audio monitoring for background voices
+- ✅ Real-time flag updates to backend
+- ✅ Security flags persisted in database and displayed to recruiters
+- ✅ Session token validation and expiration after interview
+
+### Technology Stack
+- ✅ **Frontend**: React 18 + Vite, Tailwind CSS, Lucide icons, face-api.js, Web Speech API
+- ✅ **Backend**: FastAPI, SQLAlchemy ORM, Pydantic schemas
+- ✅ **Database**: SQLite (production-ready for single recruiter)
+- ✅ **AI Providers**: Ollama (phi3, local), OpenAI (fallback), Regex (basic fallback)
+- ✅ **File Processing**: PyPDF2 (PDF), python-docx (DOCX)
+
+## Support
+
+For questions or issues, please open a GitHub issue with error details and console output.
 
 ## 🗂️ Project Structure
 
@@ -153,34 +170,75 @@ Candidly/
 ├── frontend/                 # React frontend application
 │   ├── src/
 │   │   ├── pages/
-│   │   │   ├── LandingPage.jsx           # Role selection
-│   │   │   ├── RecruiterDashboard.jsx    # Main recruiter view
-│   │   │   ├── CandidateDetail.jsx       # Candidate profile
-│   │   │   └── RecruitmentConfig.jsx     # Settings page
-│   │   ├── data/
-│   │   │   └── mockData.js               # Mock data (to be replaced)
-│   │   ├── App.jsx                        # Router configuration
-│   │   └── index.css                      # Global styles
+│   │   │   ├── LandingPage.jsx              # Role selection
+│   │   │   ├── RecruiterDashboard.jsx       # Main recruiter view
+│   │   │   ├── CandidateDetail.jsx          # Candidate profile
+│   │   │   ├── RecruitmentConfig.jsx        # Settings page
+│   │   │   ├── ApplicantInterview.jsx       # Speech-based AI interview
+│   │   │   ├── ApplicantResumeUpload.jsx    # Resume upload
+│   │   │   └── ApplicantProfile.jsx         # Code entry
+│   │   ├── services/
+│   │   │   ├── api.js                       # API client
+│   │   │   └── monitoringService.js         # Face/audio monitoring
+│   │   ├── App.jsx                           # Router configuration
+│   │   └── index.css                         # Tailwind styles
 │   └── package.json
 │
-├── backend/                  # FastAPI backend (To Be Created)
+├── backend/                  # FastAPI backend
 │   ├── app/
-│   │   ├── models/          # Database models
-│   │   ├── schemas/         # Pydantic schemas
-│   │   ├── routers/         # API endpoints
-│   │   ├── services/        # Business logic
-│   │   │   ├── resume_parser.py
-│   │   │   ├── ats_scorer.py
-│   │   │   ├── ai_interviewer.py
-│   │   │   └── interview_analyzer.py
-│   │   ├── database.py      # Database configuration
-│   │   └── main.py          # FastAPI app
-│   └── requirements.txt
+│   │   ├── models/
+│   │   │   ├── candidate.py              # Candidate ORM model
+│   │   │   └── recruitment.py            # Recruitment ORM model
+│   │   ├── schemas/
+│   │   │   ├── candidate.py              # Candidate Pydantic schemas
+│   │   │   ├── interview.py              # Interview Pydantic schemas
+│   │   │   └── recruitment.py            # Recruitment Pydantic schemas
+│   │   ├── routers/
+│   │   │   ├── candidates.py             # Candidate API endpoints
+│   │   │   ├── interview.py              # Interview API endpoints
+│   │   │   └── recruitment.py            # Recruitment API endpoints
+│   │   ├── services/
+│   │   │   ├── ai_service.py             # Unified AI service (Ollama/OpenAI)
+│   │   │   ├── resume_parser.py          # PDF/DOCX parsing
+│   │   │   └── interview_analyzer.py     # Interview evaluation
+│   │   ├── database.py                    # SQLAlchemy setup
+│   │   └── main.py                        # FastAPI app entry
+│   ├── requirements.txt
+│   └── transcripts/                       # Saved interview transcripts
 │
 └── README.md
 ```
 
 ## 🚦 Getting Started
+
+### Prerequisites
+- **Ollama** (recommended for local AI): Install from [ollama.ai](https://ollama.ai) and run `ollama pull phi3`
+- **Node.js 16+** and npm
+- **Python 3.10+** and pip
+
+### Backend Setup
+```cmd
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Create `.env` file:
+```cmd
+copy .env.example .env
+```
+
+Edit `.env` and configure:
+- `DATABASE_URL=sqlite:///./candidly.db` (default)
+- `OPENAI_API_KEY=your_key_here` (optional, fallback only)
+
+Run backend:
+```cmd
+uvicorn app.main:app --reload
+```
+
+Backend will be available at `http://localhost:8000` (API docs at `/docs`)
 
 ### Frontend Setup
 ```bash
@@ -188,96 +246,109 @@ cd frontend
 npm install
 npm run dev
 ```
-The app will run on `http://localhost:5173`
 
-### Backend Setup (Coming Soon)
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+Frontend will run on `http://localhost:5173`
 
-## 🔐 Authentication & Session Management
+## 🔐 Session Management
 
-Since there's no login system, we use a simplified approach:
-
-### For Candidates
-- **Session Token**: Generated after entering valid interview code
-- **Storage**: Browser localStorage/sessionStorage
-- **Validation**: Token includes candidate_id and expires after interview completion
+### Candidate Sessions
+- **Session Token**: Secure token generated after resume upload with valid interview code
+- **Storage**: Browser sessionStorage (cleared on tab close)
+- **Validation**: Token verified on each API call during interview
 - **Flow**: 
-  1. Enter interview code → Validate against database
-  2. Generate unique session token (JWT or UUID)
-  3. Store token in browser
-  4. All subsequent API calls include token
-  5. Token invalidated after interview submission
+  1. Enter interview code → Backend validates against active recruitment
+  2. Upload resume → AI parsing + ATS scoring → Session token generated
+  3. Token stored in browser and sent with all interview API requests
+  4. Token invalidated after interview submission
+  5. Candidate cannot restart interview (prevents cheating)
 
-### For Recruiters
-- Currently no authentication (single user)
-- Future: Simple JWT-based auth for multi-recruiter support
+### Recruiters
+- No authentication required (single-recruiter use case)
+- Direct access to dashboard and all candidate data
 
-## 🎨 Design System
+## 🎨 Design & UX
 
-### Color Palette
-- **Primary Purple**: `#a855f7` to `#7c3aed` (primary-400 to primary-600)
-- **Dark Backgrounds**: `#0a0a0f` to `#1a1a24` (dark-950 to dark-800)
+### Color Palette (Tailwind CSS)
+- **Primary Purple**: `primary-400` to `primary-600` (#a855f7 to #7c3aed)
+- **Dark Theme**: `dark-950` to `dark-800` (#0a0a0f to #1a1a24)
 - **Status Colors**:
-  - Green: Interviewed
-  - Blue: Shortlisted
-  - Yellow: New
-  - Purple: Offered
-  - Red: Rejected
+  - 🟢 Green: Interviewed
+  - 🔵 Blue: Shortlisted  
+  - 🟡 Yellow: New
+  - 🟣 Purple: Offered
+  - 🔴 Red: Rejected
 
-## 📝 API Response Examples
+### Key UX Features
+- **Speech-Based Interview**: Candidates speak naturally, AI responds via text-to-speech
+- **Visual Feedback**: Real-time indicators for AI speaking / user listening / ready to speak
+- **Security Monitoring**: Live camera feed with face detection and audio analysis
+- **Minimal Friction**: No login required for candidates, single interview code entry
+- **Recruiter Dashboard**: Quick overview with search, filter, sort, and detailed candidate profiles
 
-### Get Candidates
-```json
-GET /api/candidates?search=john&sort_by=atsScore
+## 📝 API Examples
 
+### Upload Resume
+```bash
+POST /api/interview/upload-resume
+Content-Type: multipart/form-data
+
+Response:
 {
-  "candidates": [
-    {
-      "id": 1,
-      "name": "John Doe",
-      "email": "john@example.com",
-      "status": "Interviewed",
-      "ats_score": 92,
-      "interview_score": 88,
-      "summary": "Strong technical background...",
-      "flags": [{"type": "sound", "severity": "low"}]
-    }
-  ],
-  "total": 1
+  "candidate_id": 1,
+  "session_token": "abc123...",
+  "candidate_name": "John Doe",
+  "message": "Resume uploaded successfully"
 }
 ```
 
-### Create Candidate (from Resume)
-```json
-POST /api/candidates
-
-Request:
+### Start Interview
+```bash
+POST /api/interview/start
 {
-  "interview_code": "CNDLY-001-SEN4a2b",
-  "resume_file": "<file upload>"
+  "session_token": "abc123..."
 }
 
 Response:
 {
   "candidate_id": 1,
-  "session_token": "eyJhbGc...",
-  "ats_score": 85,
-  "message": "Resume processed successfully"
+  "candidate_name": "John Doe",
+  "message": "Interview session started",
+  "greeting": "Hello John Doe. I'll be conducting your interview for the Senior Developer role..."
 }
 ```
 
-## 🤝 Contributing
+### Chat with AI
+```bash
+POST /api/interview/chat
+{
+  "session_token": "abc123...",
+  "message": "I have 5 years of experience...",
+  "conversation_history": [...]
+}
 
-This is a project in active development. Contributions and suggestions are welcome!
+Response:
+{
+  "reply": "That's good experience. Can you describe a specific system you built?"
+}
+```
 
-## 📄 License
+### Submit Interview
+```bash
+POST /api/interview/submit
+{
+  "session_token": "abc123...",
+  "responses": [
+    {"role": "ai", "content": "...", "timestamp": "..."},
+    {"role": "user", "content": "...", "timestamp": "..."}
+  ]
+}
 
-MIT License - Feel free to use this project for your own purposes.
+Response:
+{
+  "message": "Interview submitted successfully",
+  "candidate_id": 1,
+  "interview_score": 72,
+  "summary": "Candidate demonstrated solid technical knowledge..."
+}
+```
 
----
-
-**Current Status**: ✅ Frontend Complete | 🚧 Backend In Progress | ⏳ AI Integration Pending

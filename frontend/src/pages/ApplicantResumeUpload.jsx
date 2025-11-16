@@ -83,9 +83,10 @@ function ApplicantResumeUpload() {
       // Upload resume with AI parsing
       const response = await interviewApi.uploadResumeAI(interviewCode, selectedFile);
       
-      // Store candidate ID and session token
+      // Store candidate ID, session token, and name
       sessionStorage.setItem('candidate_id', response.candidate_id);
       sessionStorage.setItem('session_token', response.session_token);
+      sessionStorage.setItem('candidate_name', response.candidate_name);
       
       // Navigate to profile view
       navigate('/applicant/profile');

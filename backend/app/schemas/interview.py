@@ -7,7 +7,7 @@ class InterviewCodeValidation(BaseModel):
 class ResumeUploadResponse(BaseModel):
     candidate_id: int
     session_token: str
-    ats_score: Optional[int] = None
+    candidate_name: str
     message: str
 
 class SessionToken(BaseModel):
@@ -21,3 +21,18 @@ class InterviewSubmitRequest(BaseModel):
     session_token: str
     responses: list  # List of question-answer pairs
     recording_url: Optional[str] = None
+
+class ChatMessage(BaseModel):
+    session_token: str
+    message: str
+    conversation_history: Optional[list] = []
+
+class ChatResponse(BaseModel):
+    reply: str
+    
+class FlagUpdate(BaseModel):
+    session_token: Optional[str] = None
+    candidate_id: Optional[int] = None
+    multiple_faces_flag: Optional[int] = None
+    noise_flag: Optional[int] = None
+    ai_flag: Optional[int] = None

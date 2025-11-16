@@ -20,7 +20,6 @@ function CandidateDetail() {
       try {
         setLoading(true);
         const data = await candidatesApi.getById(candidateId);
-        console.log('Candidate data:', data); // Debug log
         setCandidate(data);
         setError(null);
       } catch (err) {
@@ -60,12 +59,40 @@ function CandidateDetail() {
 
   const handleDownloadTranscript = async () => {
     try {
-      const data = await candidatesApi.getTranscript(candidateId);
-      // For now, show alert with transcript URL
-      alert(`Transcript URL: ${data.transcript_url}`);
-      // TODO: Implement actual file download
+      // Direct fetch to get the file blob
+      const response = await fetch(`http://localhost:8000/api/candidates/${candidateId}/transcript`);
+      
+      if (!response.ok) {
+        throw new Error('Transcript not available');
+      }
+      
+      // Get the blob and filename from response
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get('content-disposition');
+      let filename = `candidate_${candidateId}_transcript.txt`;
+      
+      // Extract filename from content-disposition header if available
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+?)"?$/i);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      // Create download link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (err) {
-      alert('Transcript not available');
+      console.error('Download error:', err);
+      alert('Transcript not available or download failed');
     }
   };
 
